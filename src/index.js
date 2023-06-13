@@ -8,7 +8,8 @@ import dotenv from 'dotenv';
 import { ChatGPTUnofficialProxyAPI } from 'chatgpt';
 import Queue from 'bee-queue';
 import redis from 'redis';
-import Redis from 'ioredis';
+import fetch from 'node-fetch';
+globalThis.fetch = fetch;
 
 dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
 // dotenv.config();
