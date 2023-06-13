@@ -13,24 +13,27 @@ import Redis from 'ioredis';
 dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
 // dotenv.config();
 
-console.log(process.env.REDIS_URL);
+console.log(process.env.REDIS_HOST);
 
 
 let queue;
 const startRedis = async () => {
 
     const redisClient = redis.createClient({
-        host: process.env.REDIS_HOST,
-        port: 6379
+        legacyMode: true,
+        url: process.env.REDIS_URL,
     });
 
-   
-    await redisClient.connect();
     redisClient.on('error', (error) => console.error(`Error : ${error}`));
+    await redisClient.connect();
+
 
     queue = new Queue('messages', {
         removeOnSuccess: true,
-        redis: redisClient,
+        redis: {
+            legacyMode: true,
+            url: process.env.REDIS_URL,
+        },
     });
 
     queue.process(async (job, done) => {
