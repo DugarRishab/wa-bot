@@ -15,13 +15,38 @@ dotenv.config({ path: './config.env' }); // <- connecting the enviroment variabl
 
 console.log(process.env.REDIS_URL);
 
-const queue = new Queue('messages', {
-    removeOnSuccess: true,
-    redis: {
-        host: process.env.REDIS_URL,
-        port: 6379,
-    },
-});
+
+let queue;
+const startRedis = async () => {
+
+    const redisClient = redis.createClient({
+        host: process.env.REDIS_HOST,
+        port: 6379
+    });
+
+   
+    await redisClient.connect();
+    redisClient.on('error', (error) => console.error(`Error : ${error}`));
+
+    queue = new Queue('messages', {
+        removeOnSuccess: true,
+        redis: redisClient,
+    });
+
+    queue.process(async (job, done) => {
+        try {
+            // await job.data.reply('this is a test! no fuck off');
+            const prompt = getPrompt(job.data.message);
+            console.log(prompt);
+            const res = await getGPTresponse(prompt);
+
+            return res;
+        } catch (err) {
+            console.log('ERROR in processing JOB: ', err);
+        }
+    });
+}
+startRedis();
 
 const client = new Client();
 
@@ -59,18 +84,7 @@ const processMessage = async (message) => {
     }
 };
 
-queue.process(async (job, done) => {
-    try {
-        // await job.data.reply('this is a test! no fuck off');
-        const prompt = getPrompt(job.data.message);
-        console.log(prompt);
-        const res = await getGPTresponse(prompt);
 
-        return res;
-    } catch (err) {
-        console.log('ERROR in processing JOB: ', err);
-    }
-});
 
 const getPrompt = (message) => {
     const prompt = message.body.replace('@917003653149', ' ');
