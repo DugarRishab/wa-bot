@@ -9,8 +9,10 @@ import { ChatGPTUnofficialProxyAPI } from 'chatgpt';
 import Queue from 'bee-queue';
 import redis from 'redis';
 
-dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
+// dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
 dotenv.config();
+
+console.log(process.env.REDIS_URL);
 
 const queue = new Queue('messages', {
     removeOnSuccess: true,
