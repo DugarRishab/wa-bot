@@ -10,6 +10,7 @@ import Queue from 'bee-queue';
 import redis from 'redis';
 
 dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
+dotenv.config();
 
 const queue = new Queue('messages', {
     removeOnSuccess: true,
