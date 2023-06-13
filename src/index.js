@@ -8,15 +8,19 @@ import dotenv from 'dotenv';
 import { ChatGPTUnofficialProxyAPI } from 'chatgpt';
 import Queue from 'bee-queue';
 import redis from 'redis';
+import Redis from 'ioredis';
 
-// dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
-dotenv.config();
+dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
+// dotenv.config();
 
 console.log(process.env.REDIS_URL);
 
 const queue = new Queue('messages', {
     removeOnSuccess: true,
-    redis: redis.createClient(process.env.REDIS_URL),
+    redis: {
+        host: process.env.REDIS_URL,
+        port: 6379,
+    },
 });
 
 const client = new Client();
