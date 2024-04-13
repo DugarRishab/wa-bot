@@ -1,7 +1,3 @@
-// const qrcode = require("qrcode-terminal");
-// const { Client } = require("whatsapp-web.js");
-// const dotenv = require('dotenv');
-// const { ChatGPTUnofficialProxyAPI } = require('chatgpt');
 import qrcode from 'qrcode-terminal';
 import { Client } from 'whatsapp-web.js';
 import dotenv from 'dotenv';
@@ -9,6 +5,7 @@ import { ChatGPTUnofficialProxyAPI } from 'chatgpt';
 import Queue from 'bee-queue';
 import redis from 'redis';
 import fetch from 'node-fetch';
+import redisconfig from './redisconfig.js';
 globalThis.fetch = fetch;
 
 dotenv.config({ path: './config.env' }); // <- connecting the enviroment variables
@@ -20,10 +17,7 @@ console.log(process.env.REDIS_HOST);
 let queue;
 const startRedis = async () => {
 
-    const redisClient = redis.createClient({
-        legacyMode: true,
-        url: process.env.REDIS_URL,
-    });
+    const redisClient = redis.createClient(redisconfig);
 
     redisClient.on('error', (error) => console.error(`Error : ${error}`));
     await redisClient.connect();
@@ -31,10 +25,7 @@ const startRedis = async () => {
 
     queue = new Queue('messages', {
         removeOnSuccess: true,
-        redis: {
-            legacyMode: true,
-            url: process.env.REDIS_URL,
-        },
+        redis: redisClient
     });
 
     queue.process(async (job, done) => {
@@ -87,8 +78,6 @@ const processMessage = async (message) => {
         console.log('ERROR in processing message: ', err);
     }
 };
-
-
 
 const getPrompt = (message) => {
     const prompt = message.body.replace('@917003653149', ' ');
